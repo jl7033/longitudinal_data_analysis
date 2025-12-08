@@ -329,6 +329,12 @@ save_as_image(corr_comp_table, path = "corr_comp_table.png")
 
 ```
 
+```{r}
+
+VarCorr(model_iv)
+```
+
+
 ## Part 4: Model Evaluation and Diagnostics
 
 ```{r}
