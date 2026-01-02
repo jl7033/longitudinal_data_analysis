@@ -331,7 +331,10 @@ save_as_image(corr_comp_table, path = "corr_comp_table.png")
 
 ```{r}
 
-VarCorr(model_iv)
+final_model = model_iv
+
+VarCorr(final_model)
+
 ```
 
 
@@ -339,7 +342,7 @@ VarCorr(model_iv)
 
 ```{r}
 
-final_model = model_iv
+# make a fixed effects table
 
 fixef = summary(final_model)$tTable %>%
   janitor::clean_names() %>%
@@ -380,6 +383,20 @@ save_as_image(fixef_table, path = "fixef_table.png")
 
 ```{r}
 
+# get random effects
+
+pbc_ranef = data.frame(
+  ranef_complex = ranef(final_model)
+) %>%
+  rename(rand_int = ranef_complex..Intercept., rand_slope = ranef_complex.time_yr)
+
+sd_ri = sd(pbc_ranef$rand_int)
+sd_rs = sd(pbc_ranef$rand_slope)
+
+```
+
+```{r}
+
 # get residuals
 
 pbc_diag = pbc_data %>%
@@ -390,14 +407,6 @@ pbc_diag = pbc_data %>%
     resid_lag = lag(stage1_resid)
   ) %>%
   ungroup()
-
-# get random effects
-
-pbc_ranef = data.frame(
-  ranef_complex = ranef(final_model)
-) %>%
-  rename(rand_int = ranef_complex..Intercept., rand_slope = ranef_complex.time_yr)
-
 
 ```
 
@@ -415,7 +424,7 @@ resid_plot = pbc_diag %>%
   labs(
     title = "Distributions of Residuals by Time",
     x = "Time From Baseline (Years)",
-    y = "Normalized Stage 1 Residuals"
+    y = "Normalized S1 Resid."
   ) + 
   theme(plot.title = element_text(size = 8)) + 
   theme(axis.title = element_text(size = 7))
@@ -428,7 +437,7 @@ resid_lag_plot = pbc_diag %>%
   labs(
     title = "Residuals vs. Lagged Residuals",
     x = "Lagged Residuals",
-    y = "Normalized Stage 1 Residuals"
+    y = "Normalized S1 Resid."
   ) + 
   theme(plot.title = element_text(size = 8)) + 
   theme(axis.title = element_text(size = 7))
@@ -488,7 +497,6 @@ save_plot("diag_plots.png", diag_plots, base_width = 5, base_height = 3.75)
 
 ```
 
-
 ## Missing Data Check
 
 ```{r}
@@ -501,8 +509,3 @@ length(pbc_data_raw$platelet[is.na(pbc_data_raw$platelet)])
 length(pbc_data_raw$protime[is.na(pbc_data_raw$protime)])
 
 ```
-
-
-## Part 4: Final Model Diagnostics
-
-## Part 5: Discussion / Conclusion
